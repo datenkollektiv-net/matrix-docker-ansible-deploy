@@ -11,6 +11,21 @@
   set_fact:
     matrix_user_gid: "{{ matrix_group.gid }}"
 
+- name: Ensure Matrix service user is created
+  user:
+    name: "{{ matrix_service_username }}"
+    uid: "{{ omit if matrix_service_uid is none else matrix_service_uid }}"
+    state: present
+    group: "{{ matrix_user_groupname }}"
+    home: "{{ matrix_base_data_service_path }}"
+    create_home: false
+    system: true
+  register: matrix_service_user
+
+- name: Set Matrix service UID Variable
+  set_fact:
+    matrix_service_uid: '{{ matrix_service_user.uid }}'
+
 - name: Ensure Matrix user is created
   user:
     name: "{{ matrix_user_username }}"
