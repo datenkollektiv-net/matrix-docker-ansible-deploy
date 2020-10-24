@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: "True"
 [Unit]
-Description=Synapse server
+Description=Synapse server ({{ matrix_instance_id }})
 {% for service in matrix_synapse_systemd_required_services_list %}
 Requires={{ service }}
 After={{ service }}
@@ -11,8 +11,8 @@ Wants={{ service }}
 
 [Service]
 Type=simple
-ExecStartPre=-{{ matrix_host_command_docker }} kill matrix-synapse
-ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-synapse
+ExecStartPre=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse
+ExecStartPre=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse
 {% if matrix_s3_media_store_enabled %}
 # Allow for some time before starting, so that media store can mount.
 # Mounting can happen later too, but if we start writing,
@@ -20,7 +20,7 @@ ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-synapse
 ExecStartPre={{ matrix_host_command_sleep }} 3
 {% endif %}
 
-ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-synapse \
+ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id }}-synapse \
 			--log-driver=none \
 			--user={{ matrix_user_uid }}:{{ matrix_user_gid }} \
 			--cap-drop=ALL \
@@ -54,12 +54,12 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-synapse \
 			{{ matrix_synapse_docker_image }} \
 			-m synapse.app.homeserver -c /data/homeserver.yaml
 
-ExecStop=-{{ matrix_host_command_docker }} kill matrix-synapse
-ExecStop=-{{ matrix_host_command_docker }} rm matrix-synapse
-ExecReload={{ matrix_host_command_docker }} exec matrix-synapse kill -HUP 1
+ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse
+ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse
+ExecReload={{ matrix_host_command_docker }} exec {{ matrix_instance_id }}-synapse kill -HUP 1
 Restart=always
 RestartSec=30
-SyslogIdentifier=matrix-synapse
+SyslogIdentifier={{ matrix_instance_id }}-synapse
 
 [Install]
 WantedBy=multi-user.target

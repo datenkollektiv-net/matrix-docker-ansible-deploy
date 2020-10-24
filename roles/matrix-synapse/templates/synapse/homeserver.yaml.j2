@@ -1972,8 +1972,8 @@ email:
 
   # Enable sending emails for messages that the user has missed
   #
-  #enable_notifs: false
-  enable_notifs: true
+  enable_notifs: false
+  #enable_notifs: true
 
   # notif_from defines the "From" address to use when sending emails.
   # It must be set if email sending is enabled.
@@ -1985,8 +1985,8 @@ email:
   # Note that the placeholder must be written '%(app)s', including the
   # trailing 's'.
   #
-  #notif_from: "Your Friendly %(app)s homeserver <noreply@example.com>"
-  notif_from: {{ matrix_synapse_email_notif_from|string|to_json }}
+  notif_from: "Your Friendly %(app)s homeserver <noreply@example.com>"
+  # MODIFIED: compare roles/matrix-synapse/templates/synapse/homeserver.yaml.j2
 
   # app_name defines the default value for '%(app)s' in notif_from and email
   # subjects. It defaults to 'Matrix'.

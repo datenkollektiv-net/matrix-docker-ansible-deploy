@@ -989,16 +989,16 @@ matrix_synapse_systemd_required_services_list: |
   {{
     (['docker.service'])
     +
-    (['matrix-postgres.service'] if matrix_postgres_enabled else [])
+    ([ matrix_instance_id + '-postgres.service'] if matrix_postgres_enabled else [])
     +
-    (['matrix-goofys'] if matrix_s3_media_store_enabled else [])
+    ([ matrix_instance_id + '-goofys'] if matrix_s3_media_store_enabled else [])
   }}
 
 matrix_synapse_systemd_wanted_services_list: |
   {{
-    (['matrix-coturn.service'] if matrix_coturn_enabled else [])
+    ([ matrix_instance_id + '-coturn.service'] if matrix_coturn_enabled else [])
     +
-    (['matrix-mailer.service'] if matrix_mailer_enabled else [])
+    ([ matrix_instance_id + '-mailer.service'] if matrix_mailer_enabled else [])
   }}
 
 ######################################################################

@@ -40,9 +40,9 @@
 
 # Actual import work
 
-- name: Ensure matrix-synapse is stopped
+- name: Ensure {{ matrix_instance_id }}-synapse is stopped
   service:
-    name: matrix-synapse
+    name: '{{ matrix_instance_id }}-synapse'
     state: stopped
     daemon_reload: yes
   register: stopping_result
@@ -75,9 +75,7 @@
 
 - name: Ensure Synapse is started (if it previously was)
   service:
-    name: "{{ item }}"
+    name: '{{ matrix_instance_id }}-synapse'
     state: started
     daemon_reload: yes
   when: "stopping_result.changed"
-  with_items:
-    - matrix-synapse
