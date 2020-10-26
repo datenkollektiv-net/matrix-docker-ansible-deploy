@@ -11,12 +11,12 @@ ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-postgres
 
 ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-postgres \
 			--log-driver=none \
-			--user={{ matrix_user_uid }}:{{ matrix_user_gid }} \
+			--user={{ matrix_service_uid }}:{{ matrix_user_gid }} \
 			--cap-drop=ALL \
 			--read-only \
 			--tmpfs=/tmp:rw,noexec,nosuid,size=100m \
 			--tmpfs=/run/postgresql:rw,noexec,nosuid,size=100m \
-			--network={{ matrix_docker_network }} \
+			--network={{ matrix_docker_postgres_network }} \
 			{% if matrix_postgres_container_postgres_bind_port %}
 			-p {{ matrix_postgres_container_postgres_bind_port }}:5432 \
 			{% endif %}

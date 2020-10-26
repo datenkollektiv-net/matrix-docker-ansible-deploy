@@ -14,6 +14,12 @@
     - setup-all
     - setup-postgres
 
+- import_tasks: "{{ role_path }}/tasks/create_userdb.yml"
+  when: run_setup|bool
+  tags:
+    - setup-all
+    - setup-postgres
+
 - import_tasks: "{{ role_path }}/tasks/import_postgres.yml"
   when: run_postgres_import|bool
   tags:

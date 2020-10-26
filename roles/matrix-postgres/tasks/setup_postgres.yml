@@ -44,11 +44,22 @@
     path: "{{ item }}"
     state: directory
     mode: 0700
-    owner: "{{ matrix_user_username }}"
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
   with_items:
     - "{{ matrix_postgres_base_path }}"
     - "{{ matrix_postgres_data_path }}"
+  when: matrix_postgres_enabled|bool
+
+- name: Ensure Postgres user paths exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+  with_items:
+    - "{{ matrix_postgres_instance_base_path }}"
   when: matrix_postgres_enabled|bool
 
 # We do this as a separate task, because:
@@ -58,32 +69,40 @@
   file:
     path: "{{ matrix_postgres_data_path }}"
     state: directory
-    owner: "{{ matrix_user_username }}"
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
     recurse: yes
   when: matrix_postgres_enabled|bool
 
-- name: Ensure Postgres environment variables file created
+- name: Ensure Postgres user environment variables file created
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ matrix_postgres_instance_base_path }}/{{ item }}"
+    mode: 0600
+  with_items:
+    - "env-postgres-psql"
+  when: matrix_postgres_enabled|bool
+
+- name: Ensure Postgres server environment variables file created
   template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ matrix_postgres_base_path }}/{{ item }}"
-    mode: 0640
+    mode: 0600
   with_items:
-    - "env-postgres-psql"
     - "env-postgres-server"
   when: matrix_postgres_enabled|bool
 
-- name: Ensure matrix-postgres-cli script created
+- name: Ensure {{ matrix_instance_id }}-postgres-cli script created
   template:
     src: "{{ role_path }}/templates/usr-local-bin/matrix-postgres-cli.j2"
-    dest: "{{ matrix_local_bin_path }}/matrix-postgres-cli"
+    dest: "{{ matrix_local_bin_path }}/{{ matrix_instance_id }}-postgres-cli"
     mode: 0750
   when: matrix_postgres_enabled|bool
 
 - name: Ensure matrix-change-user-admin-status script created
   template:
     src: "{{ role_path }}/templates/usr-local-bin/matrix-change-user-admin-status.j2"
-    dest: "{{ matrix_local_bin_path }}/matrix-change-user-admin-status"
+    dest: "{{ matrix_local_bin_path }}/{{ matrix_instance_id }}-change-user-admin-status"
     mode: 0750
   when: matrix_postgres_enabled|bool
 
@@ -93,10 +112,10 @@
     state: absent
   when: matrix_postgres_enabled|bool
 
-- name: Ensure matrix-postgres-update-user-password-hash script created
+- name: Ensure {{ matrix_instance_id }}-postgres-update-user-password-hash script created
   template:
     src: "{{ role_path }}/templates/usr-local-bin/matrix-postgres-update-user-password-hash.j2"
-    dest: "{{ matrix_local_bin_path }}/matrix-postgres-update-user-password-hash"
+    dest: "{{ matrix_local_bin_path }}/{{ matrix_instance_id }}-postgres-update-user-password-hash"
     mode: 0750
   when: matrix_postgres_enabled|bool
 
@@ -158,7 +177,7 @@
     path: "{{ matrix_local_bin_path }}/{{ item }}"
     state: absent
   with_items:
-    - matrix-postgres-cli
-    - matrix-change-user-admin-status
-    - matrix-postgres-update-user-password-hash
+    - '{{ matrix_instance_id }}-postgres-cli'
+    - '{{ matrix_instance_id }}-change-user-admin-status'
+    - '{{ matrix_instance_id }}-postgres-update-user-password-hash'
   when: "not matrix_postgres_enabled|bool"

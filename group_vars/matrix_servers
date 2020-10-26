@@ -989,7 +989,7 @@ matrix_synapse_systemd_required_services_list: |
   {{
     (['docker.service'])
     +
-    ([ matrix_instance_id + '-postgres.service'] if matrix_postgres_enabled else [])
+    (['matrix-postgres.service'] if matrix_postgres_enabled else [])
     +
     ([ matrix_instance_id + '-goofys'] if matrix_s3_media_store_enabled else [])
   }}

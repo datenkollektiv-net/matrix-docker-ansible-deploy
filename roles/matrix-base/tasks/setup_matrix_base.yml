@@ -54,6 +54,18 @@
     cmd: "docker network create --driver=bridge {{ matrix_docker_network }}"
   when: "result_check_docker_network.stdout == '' and not ansible_check_mode"
 
+- name: Check existence of Matrix postgres network in Docker
+  shell:
+    cmd: "docker network ls -q --filter='name=^{{ matrix_docker_postgres_network }}$'"
+  register: result_check_docker_postgres_network
+  changed_when: false
+  check_mode: false
+
+- name: Create Matrix postgres network in Docker
+  shell:
+    cmd: "docker network create --driver=bridge {{ matrix_docker_postgres_network }}"
+  when: "result_check_docker_postgres_network.stdout == '' and not ansible_check_mode"
+
 - name: Ensure matrix-remove-all script created
   template:
     src: "{{ role_path }}/templates/usr-local-bin/matrix-remove-all.j2"
