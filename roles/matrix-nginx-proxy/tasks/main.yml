@@ -35,4 +35,4 @@
   set_fact:
     matrix_nginx_proxy_role_executed: true
   tags:
-   - always
+    - always

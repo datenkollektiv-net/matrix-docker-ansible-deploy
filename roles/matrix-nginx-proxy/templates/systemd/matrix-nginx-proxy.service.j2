@@ -16,11 +16,11 @@ ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-nginx-proxy
 
 ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-nginx-proxy \
 			--log-driver=none \
-			--user={{ matrix_user_uid }}:{{ matrix_user_gid }} \
+			--user={{ matrix_service_uid }}:{{ matrix_user_gid }} \
 			--cap-drop=ALL \
 			--read-only \
 			--tmpfs=/tmp:rw,noexec,nosuid,size={{ matrix_nginx_proxy_tmp_directory_size_mb }}m \
-			--network={{ matrix_docker_network }} \
+			--network={{ matrix_docker_nginx_network }} \
 			{% if matrix_nginx_proxy_container_http_host_bind_port %}
 			-p {{ matrix_nginx_proxy_container_http_host_bind_port }}:8080 \
 			{% endif %}
@@ -33,6 +33,7 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-nginx-proxy \
 			-v {{ matrix_nginx_proxy_base_path }}/nginx.conf:/etc/nginx/nginx.conf:ro \
 			-v {{ matrix_nginx_proxy_data_path }}:/nginx-data:ro \
 			-v {{ matrix_nginx_proxy_confd_path }}:/etc/nginx/conf.d:ro \
+			-v {{ matrix_nginx_proxy_instance_base_path }}:/etc/nginx/instances:ro \
 			-v {{ matrix_ssl_config_dir_path }}:{{ matrix_ssl_config_dir_path }}:ro \
 			-v {{ matrix_static_files_base_path }}:{{ matrix_static_files_base_path }}:ro \
 			{% for volume in matrix_nginx_proxy_container_additional_volumes %}

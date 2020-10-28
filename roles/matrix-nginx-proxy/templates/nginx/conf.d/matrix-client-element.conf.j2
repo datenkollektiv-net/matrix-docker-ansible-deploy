@@ -14,7 +14,7 @@
 		{% if matrix_nginx_proxy_enabled %}
 			{# Use the embedded DNS resolver in Docker containers to discover the service #}
 			resolver 127.0.0.11 valid=5s;
-			set $backend "matrix-client-element:8080";
+			set $backend "{{ matrix_nginx_proxy_proxy_element_addr_with_container }}";
 			proxy_pass http://$backend;
 		{% else %}
 			{# Generic configuration for use outside of our container setup #}

@@ -15,69 +15,85 @@
     path: "{{ item }}"
     state: directory
     mode: 0750
-    owner: "{{ matrix_user_username }}"
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
   with_items:
     - "{{ matrix_nginx_proxy_base_path }}"
     - "{{ matrix_nginx_proxy_data_path }}"
     - "{{ matrix_nginx_proxy_confd_path }}"
+    - "{{ matrix_nginx_proxy_instance_base_path }}"
+    - "{{ matrix_nginx_proxy_instance_path }}"
 
 - name: Ensure Matrix nginx-proxy configured (main config override)
   template:
     src: "{{ role_path }}/templates/nginx/nginx.conf.j2"
     dest: "{{ matrix_nginx_proxy_base_path }}/nginx.conf"
-    mode: 0644
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
+  when: matrix_nginx_proxy_enabled|bool
+
+- name: Ensure Matrix instance nginx configs are linked
+  template:
+    src: "{{ role_path }}/templates/nginx/incl-instance.conf.j2"
+    dest: "{{ matrix_nginx_proxy_confd_path }}/{{matrix_instance_id }}.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_enabled|bool
 
 - name: Ensure matrix-synapse-metrics-htpasswd is present (protecting /_synapse/metrics URI)
   template:
     src: "{{ role_path }}/templates/nginx/matrix-synapse-metrics-htpasswd.j2"
-    dest: "{{ matrix_nginx_proxy_data_path }}/matrix-synapse-metrics-htpasswd"
-    owner: "{{ matrix_user_username }}"
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-synapse-metrics-htpasswd"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
-    mode: 0400
   when: "matrix_nginx_proxy_proxy_synapse_metrics_basic_auth_enabled|bool and matrix_nginx_proxy_proxy_synapse_metrics|bool"
-
-- name: Ensure Matrix nginx-proxy configured (generic)
-  template:
-    src: "{{ role_path }}/templates/nginx/conf.d/nginx-http.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/nginx-http.conf"
-    mode: 0644
-  when: matrix_nginx_proxy_enabled|bool
 
 - name: Ensure Matrix nginx-proxy configuration for matrix domain exists
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-synapse.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-synapse.conf"
-    mode: 0644
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-synapse.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_proxy_matrix_enabled|bool
 
 - name: Ensure Matrix nginx-proxy configuration for Element domain exists
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-client-element.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-client-element.conf"
-    mode: 0644
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-client-element.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_proxy_element_enabled|bool
 
 - name: Ensure Matrix nginx-proxy configuration for riot domain exists
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-riot-web.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-riot-web.conf"
-    mode: 0644
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-riot-web.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_proxy_riot_compat_redirect_enabled|bool
 
 - name: Ensure Matrix nginx-proxy configuration for dimension domain exists
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-dimension.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-dimension.conf"
-    mode: 0644
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-dimension.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_proxy_dimension_enabled|bool
 
 - name: Ensure Matrix nginx-proxy configuration for jitsi domain exists
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-jitsi.conf.j2"
-    dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-jitsi.conf"
-    mode: 0644
+    dest: "{{ matrix_nginx_proxy_instance_path }}/matrix-jitsi.conf"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_proxy_jitsi_enabled|bool
 
 - name: Ensure Matrix nginx-proxy data directory for base domain exists
@@ -85,7 +101,7 @@
     path: "{{ matrix_nginx_proxy_data_path }}/matrix-domain"
     state: directory
     mode: 0750
-    owner: "{{ matrix_user_username }}"
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_base_domain_serving_enabled|bool
 
@@ -93,8 +109,8 @@
   copy:
     content: "{{ matrix_nginx_proxy_base_domain_homepage_template }}"
     dest: "{{ matrix_nginx_proxy_data_path }}/matrix-domain/index.html"
-    mode: 0644
-    owner: "{{ matrix_user_username }}"
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
     group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_base_domain_serving_enabled|bool and matrix_nginx_proxy_base_domain_homepage_enabled|bool
 
@@ -102,7 +118,9 @@
   template:
     src: "{{ role_path }}/templates/nginx/conf.d/matrix-domain.conf.j2"
     dest: "{{ matrix_nginx_proxy_confd_path }}/matrix-domain.conf"
-    mode: 0644
+    mode: 0640
+    owner: "{{ matrix_service_username }}"
+    group: "{{ matrix_user_groupname }}"
   when: matrix_nginx_proxy_base_domain_serving_enabled|bool
 
 #
@@ -161,25 +179,25 @@
 
 - name: Ensure Matrix nginx-proxy configuration for matrix domain deleted
   file:
-    path: "{{ matrix_nginx_proxy_confd_path }}/matrix-synapse.conf"
+    path: "{{ matrix_nginx_proxy_instance_base_path }}/matrix-synapse.conf"
     state: absent
   when: "not matrix_nginx_proxy_proxy_matrix_enabled|bool"
 
 - name: Ensure Matrix nginx-proxy configuration for riot domain deleted
   file:
-    path: "{{ matrix_nginx_proxy_confd_path }}/matrix-riot-web.conf"
+    path: "{{ matrix_nginx_proxy_instance_base_path }}/matrix-riot-web.conf"
     state: absent
   when: "not matrix_nginx_proxy_proxy_riot_compat_redirect_enabled|bool"
 
 - name: Ensure Matrix nginx-proxy configuration for dimension domain deleted
   file:
-    path: "{{ matrix_nginx_proxy_confd_path }}/matrix-dimension.conf"
+    path: "{{ matrix_nginx_proxy_instance_base_path }}/matrix-dimension.conf"
     state: absent
   when: "not matrix_nginx_proxy_proxy_dimension_enabled|bool"
 
 - name: Ensure Matrix nginx-proxy configuration for jitsi domain deleted
   file:
-    path: "{{ matrix_nginx_proxy_confd_path }}/matrix-jitsi.conf"
+    path: "{{ matrix_nginx_proxy_instance_base_path }}/matrix-jitsi.conf"
     state: absent
   when: "not matrix_nginx_proxy_proxy_jitsi_enabled|bool"
 
