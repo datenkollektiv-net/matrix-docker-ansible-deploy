@@ -27,7 +27,7 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			--entrypoint=python \
 			--read-only \
 			--tmpfs=/tmp:rw,noexec,nosuid,size={{ matrix_synapse_tmp_directory_size_mb }}m \
-			--network={{ matrix_docker_postgres_network }} \
+ 			--network={{ matrix_synapse_default_docker_network }} \
 			{% if matrix_synapse_container_client_api_host_bind_port %}
 			-p {{ matrix_synapse_container_client_api_host_bind_port }}:8008 \
 			{% endif %}
@@ -54,9 +54,11 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{{ matrix_synapse_docker_image }} \
 			-m synapse.app.homeserver -c /data/homeserver.yaml
 
-{% if matrix_docker_postgres_network %}
+{% if matrix_synapse_additional_docker_networks %}
 ExecStartPost={{ matrix_host_command_sleep }} 5
-ExecStartPost={{ matrix_host_command_docker }} network connect {{ matrix_docker_network }} {{ matrix_instance_id }}-synapse
+{% for item in matrix_synapse_additional_docker_networks %}
+ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ matrix_instance_id }}-synapse
+{% endfor %}
 {% endif %}
 
 ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse

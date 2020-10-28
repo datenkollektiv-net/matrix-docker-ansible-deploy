@@ -16,7 +16,7 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			--user={{ matrix_user_uid }}:{{ matrix_user_gid }} \
 			--cap-drop=ALL \
 			--read-only \
-			--network={{ matrix_docker_network }} \
+			--network={{ matrix_client_element_default_docker_network }} \
 			{% if matrix_client_element_container_http_host_bind_port %}
 			-p {{ matrix_client_element_container_http_host_bind_port }}:8080 \
 			{% endif %}
@@ -32,6 +32,13 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{{ arg }} \
 			{% endfor %}
 			{{ matrix_client_element_docker_image }}
+
+{% if matrix_client_element_additional_docker_networks %}
+ExecStartPost={{ matrix_host_command_sleep }} 5
+{% for item in matrix_client_element_additional_docker_networks %}
+ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ matrix_instance_id }}-client-element
+{% endfor %}
+{% endif %}
 
 ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-client-element
 ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-client-element
