@@ -1,7 +1,13 @@
 ---
-
-- name: Ensure Matrix services stopped
+- name: Ensure Matrix instances services stopped
   service:
     name: "{{ item }}"
     state: stopped
-  with_items: "{{ matrix_systemd_services_list }}"
+  with_items: "{{ matrix_systemd_instance_services_list }}"
+
+- name: Ensure Matrix base services stopped
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items: "{{ matrix_systemd_base_services_list }}"
+  when: ( matrix_systemd_base_services_enabled | default(false) | bool )

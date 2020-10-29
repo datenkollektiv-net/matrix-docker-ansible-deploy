@@ -4,19 +4,34 @@
   service:
     daemon_reload: yes
 
-- name: Ensure Matrix services are stopped
+- name: Ensure Matrix instances services stopped
   service:
     name: "{{ item }}"
     state: stopped
-  with_items: "{{ matrix_systemd_services_list }}"
+  with_items: "{{ matrix_systemd_instance_services_list }}"
   when: not ansible_check_mode
 
-- name: Ensure Matrix services are started
+- name: Ensure Matrix base services stopped
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items: "{{ matrix_systemd_base_services_list }}"
+  when: not ansible_check_mode and ( matrix_systemd_base_services_enabled | default(false) | bool )
+
+- name: Ensure Matrix base services are started
   service:
     name: "{{ item }}"
     enabled: yes
     state: started
-  with_items: "{{ matrix_systemd_services_list }}"
+  with_items: "{{ matrix_systemd_base_services_list }}"
+  when: not ansible_check_mode and ( matrix_systemd_base_services_enabled | default(false) | bool )
+
+- name: Ensure Matrix instance services are started
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ matrix_systemd_instance_services_list }}"
   when: not ansible_check_mode
 
 # If we check service state immediately, we may succeed,
@@ -40,7 +55,7 @@
         {{ item }} was not detected to be running.
         It's possible that there's a configuration problem or another service on your server interferes with it (uses the same ports, etc.).
         Try running `systemctl status {{ item }}` and `journalctl -fu {{ item }}` on the server to investigate.
-    with_items: "{{ matrix_systemd_services_list }}"
+    with_items: "{{ matrix_systemd_base_services_list + matrix_systemd_instance_services_list }}"
     when:
       - "ansible_facts.services[item + '.service']|default(none) is none or ansible_facts.services[item + '.service'].state != 'running'"
   when: " ansible_distribution != 'Archlinux'"

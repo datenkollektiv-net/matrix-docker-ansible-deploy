@@ -1,12 +1,22 @@
+---
+- name: Register systemd base services
+  set_fact:
+      matrix_systemd_base_services_enabled: true
+  tags:
+    - start-all
+    - stop-all
+
 - import_tasks: "{{ role_path }}/tasks/start.yml"
   when: run_start|bool
   tags:
     - start
+    - start-all
 
 - import_tasks: "{{ role_path }}/tasks/stop.yml"
   when: run_stop|bool
   tags:
     - stop
+    - stop-all
 
 - import_tasks: "{{ role_path }}/tasks/dump_runtime_results.yml"
   tags:
