@@ -54,7 +54,7 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{{ matrix_synapse_docker_image }} \
 			-m synapse.app.homeserver -c /data/homeserver.yaml
 
-{% if matrix_synapse_additional_docker_networks %}
+{% if matrix_synapse_additional_docker_networks is defined %}
 ExecStartPost={{ matrix_host_command_sleep }} 5
 {% for item in matrix_synapse_additional_docker_networks %}
 ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ matrix_instance_id }}-synapse

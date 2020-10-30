@@ -33,7 +33,7 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{% endfor %}
 			{{ matrix_client_element_docker_image }}
 
-{% if matrix_client_element_additional_docker_networks %}
+{% if matrix_client_element_additional_docker_networks is defined%}
 ExecStartPost={{ matrix_host_command_sleep }} 5
 {% for item in matrix_client_element_additional_docker_networks %}
 ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ matrix_instance_id }}-client-element
