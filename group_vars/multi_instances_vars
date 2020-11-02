@@ -1,0 +1,81 @@
+# Instance ID is used in many situation e.g. PostgreSQL DB user and DB name 
+matrix_instance_id: 'matrix-{{ matrix_instance_name }}'
+
+# Service user
+matrix_service_username: 'matrix'
+
+# User for the specified instance
+matrix_user_username: '{{ matrix_instance_id }}'
+matrix_user_groupname: '{{ matrix_service_username }}'
+
+# Base settings
+matrix_base_data_service_path_mode: 0750
+matrix_base_data_service_path: '/srv/matrix'
+
+matrix_base_data_path_mode: 0700
+matrix_base_data_path: '{{ matrix_base_data_service_path }}/{{ matrix_instance_name }}'
+
+matrix_docker_network: '{{ matrix_instance_id }}'
+
+# Feature settings - need to check, what is default and what is not
+matrix_synapse_enabled: true
+matrix_synapse_default_docker_network: '{{ matrix_docker_postgres_network }}'
+matrix_synapse_additional_docker_networks:
+    - '{{ matrix_docker_network }}'
+    - '{{ matrix_docker_nginx_network }}'
+
+matrix_postgres_enabled: true
+matrix_docker_postgres_network: 'postgres'
+matrix_postgres_base_path: '{{ matrix_base_data_service_path }}/_postgres'
+matrix_postgres_instance_base_path: '{{ matrix_base_data_path }}/postgres'
+
+matrix_postgres_connection_username: '{{ matrix_user_username }}'
+matrix_postgres_db_name: '{{ matrix_user_username }}'
+
+matrix_client_element_enabled: true
+matrix_client_element_default_docker_network: '{{ matrix_docker_nginx_network }}'
+
+# nginx-proxy
+matrix_nginx_proxy_enabled: true
+matrix_docker_nginx_network: 'nginx'
+matrix_ssl_retrieval_method: 'none'
+matrix_nginx_proxy_base_path: '{{ matrix_base_data_service_path }}/_nginx'
+matrix_nginx_proxy_instance_base_path: '{{ matrix_nginx_proxy_base_path }}/instances'
+matrix_nginx_proxy_instance_path: '{{ matrix_nginx_proxy_instance_base_path }}/{{ matrix_instance_id }}'
+
+matrix_nginx_proxy_systemd_wanted_services_list: {}
+matrix_nginx_proxy_proxy_matrix_enabled: true
+matrix_nginx_proxy_https_enabled: false
+
+#matrix_nginx_proxy_proxy_matrix_hostname: '{{ matrix_instance_id }}.{{ matrix_cloud_domain }}'
+matrix_nginx_proxy_proxy_matrix_identity_api_enabled: false
+matrix_nginx_proxy_proxy_matrix_user_directory_search_enabled: false
+
+matrix_nginx_proxy_proxy_matrix_client_api_addr_with_container: '{{ matrix_instance_id }}-synapse:8008'
+matrix_nginx_proxy_proxy_matrix_federation_api_addr_with_container: '{{ matrix_instance_id }}-synapse:8048'
+#matrix_nginx_proxy_proxy_matrix_identity_api_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
+#matrix_nginx_proxy_proxy_matrix_user_directory_search_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
+#matrix_nginx_proxy_proxy_matrix_3pid_registration_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
+#matrix_nginx_proxy_proxy_matrix_corporal_api_addr_with_container: '{{ matrix_instance_id }}-corporal:41081'
+
+matrix_nginx_proxy_proxy_element_enabled: true
+matrix_nginx_proxy_proxy_element_addr_with_container: '{{ matrix_instance_id }}-client-element:8080'
+
+matrix_nginx_proxy_proxy_jitsi_enabled: false
+matrix_nginx_proxy_proxy_dimension_enabled: false
+
+# WARNING: if enable s3_media_store, you have to adapt
+# 'roles/matrix-synapse/tasks/goofys/setup.yml' to be multi instance capable
+matrix_s3_media_store_enabled: false
+
+# Need to disable, otherwise 'homeserver config' generation fails
+matrix_coturn_enabled: false
+matrix_mailer_enabled: false
+
+# Different ways for synapse password auth
+matrix_synapse_password_config_localdb_enabled: true
+matrix_synapse_ext_password_provider_rest_auth_enabled: false
+matrix_synapse_ext_password_provider_shared_secret_auth_enabled: false
+
+# TODO
+# see /srv/matrix/dkn/static-files/.well-known/matrix.. (role: matrix-base/setup_well_known..)
