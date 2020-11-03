@@ -64,6 +64,35 @@
     - {src: "{{ matrix_client_element_embedded_pages_home_path }}", name: "home.html"}
   when: "matrix_client_element_enabled|bool and item.src is not none"
 
+- name: Manage branding Element resources
+  block:
+    - name: Ensure branding Element resource folder exists
+      file:
+        path: "{{ matrix_client_element_data_path }}/branding"
+        state: directory
+        mode: 0750
+        owner: "{{ matrix_user_username }}"
+        group: "{{ matrix_user_groupname }}"
+    - name: Find branding files
+      find:
+        paths: "{{ matrix_client_element_add_branding_dir }}"
+      register: matrix_client_element_branding_file_list
+      delegate_to: 127.0.0.1
+
+    - name: Copy branding Element files
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ matrix_client_element_data_path }}/branding/"
+        mode: 0640
+        owner: "{{ matrix_user_username }}"
+        group: "{{ matrix_user_groupname }}"
+      with_items: "{{ matrix_client_element_branding_file_list.files }}"
+
+    - name: Add branding docker mount point
+      set_fact:
+        matrix_client_element_container_extra_arguments: "{{ matrix_client_element_container_extra_arguments + [ '-v {{ matrix_client_element_data_path }}/branding:/app/branding:ro' ]}}"
+  when: matrix_client_element_add_branding_dir is defined
+
 - name: Ensure Element config files removed
   file:
     path: "{{ matrix_client_element_data_path }}/{{ item.name }}"

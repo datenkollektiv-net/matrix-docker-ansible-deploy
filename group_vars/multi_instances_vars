@@ -1,3 +1,9 @@
+# Path to custom instance config folder
+dkn_instance_config_dir: '{{ inventory_dir }}/host_vars/dkn-matrix-instances/{{ matrix_instance_name }}'
+
+# Reference to this file
+matrix_vars_yml_snapshotting_src: '{{ dkn_instance_config_dir }}/config.yml'
+
 # Instance ID is used in many situation e.g. PostgreSQL DB user and DB name 
 matrix_instance_id: 'matrix-{{ matrix_instance_name }}'
 
