@@ -23,6 +23,9 @@ matrix_synapse_default_docker_network: '{{ matrix_docker_postgres_network }}'
 matrix_synapse_additional_docker_networks:
     - '{{ matrix_docker_network }}'
     - '{{ matrix_docker_nginx_network }}'
+matrix_synapse_macaroon_secret_key: '{{ lookup("password", secret
+                                         + "/matrix/" + matrix_instance_name
+                                         + "/matrix_synapse_macaroon_secret_key") }}'
 
 matrix_postgres_enabled: true
 matrix_docker_postgres_network: 'postgres'
@@ -31,6 +34,9 @@ matrix_postgres_instance_base_path: '{{ matrix_base_data_path }}/postgres'
 
 matrix_postgres_connection_username: '{{ matrix_user_username }}'
 matrix_postgres_db_name: '{{ matrix_user_username }}'
+matrix_postgres_connection_password: '{{ lookup("password", secret
+                                          + "/matrix/" + matrix_instance_name
+                                          + "/matrix_postgres_connection_password") }}'
 
 matrix_client_element_enabled: true
 matrix_client_element_default_docker_network: '{{ matrix_docker_nginx_network }}'
