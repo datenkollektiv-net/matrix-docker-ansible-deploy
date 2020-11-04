@@ -1,3 +1,8 @@
+---
+
+- name: Not implemented for multi-instances yet
+  fail:
+
 - name: Fail if playbook called incorrectly
   fail:
     msg: "The `one_time` variable needs to be provided to this playbook, via --extra-vars"

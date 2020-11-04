@@ -4,7 +4,7 @@ dkn_instance_config_dir: '{{ inventory_dir }}/host_vars/dkn-matrix-instances/{{ 
 # Reference to this file
 matrix_vars_yml_snapshotting_src: '{{ dkn_instance_config_dir }}/config.yml'
 
-# Instance ID is used in many situation e.g. PostgreSQL DB user and DB name 
+# Instance ID is used in many situation e.g. PostgreSQL DB user and DB name
 matrix_instance_id: 'matrix-{{ matrix_instance_name }}'
 
 # Service user
@@ -46,6 +46,16 @@ matrix_postgres_connection_password: '{{ lookup("password", secret
 
 matrix_client_element_enabled: true
 matrix_client_element_default_docker_network: '{{ matrix_docker_nginx_network }}'
+
+matrix_registration_enabled: true
+matrix_registration_default_docker_network: '{{ matrix_docker_network }}'
+matrix_registration_additional_docker_networks:
+    - '{{ matrix_docker_nginx_network }}'
+matrix_registration_server_location: "http://{{ matrix_instance_id }}-synapse:8008"
+matrix_registration_public_endpoint: /registration
+matrix_registration_admin_secret: '{{ lookup("password", secret
+                                      + "/matrix/" + matrix_instance_name
+                                      + "/matrix_registration_admin_secret") }}'
 
 # nginx-proxy
 matrix_nginx_proxy_enabled: true
