@@ -69,12 +69,12 @@ matrix_nginx_proxy_systemd_wanted_services_list: {}
 matrix_nginx_proxy_proxy_matrix_enabled: true
 matrix_nginx_proxy_https_enabled: false
 
-#matrix_nginx_proxy_proxy_matrix_hostname: '{{ matrix_instance_id }}.{{ matrix_cloud_domain }}'
+matrix_nginx_proxy_proxy_federation_hostname: '{{ matrix_instance_federation_hostname }}'
 matrix_nginx_proxy_proxy_matrix_identity_api_enabled: false
 matrix_nginx_proxy_proxy_matrix_user_directory_search_enabled: false
 
 matrix_nginx_proxy_proxy_matrix_client_api_addr_with_container: '{{ matrix_instance_id }}-synapse:8008'
-matrix_nginx_proxy_proxy_matrix_federation_api_addr_with_container: '{{ matrix_instance_id }}-synapse:8048'
+matrix_nginx_proxy_proxy_matrix_federation_api_addr_with_container: '{{ matrix_instance_id }}-synapse:8448'
 #matrix_nginx_proxy_proxy_matrix_identity_api_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
 #matrix_nginx_proxy_proxy_matrix_user_directory_search_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
 #matrix_nginx_proxy_proxy_matrix_3pid_registration_addr_with_container: '{{ matrix_instance_id }}-ma1sd:8090'
