@@ -78,6 +78,7 @@
         paths: "{{ matrix_client_element_add_branding_dir }}"
       register: matrix_client_element_branding_file_list
       delegate_to: 127.0.0.1
+      become: false
 
     - name: Copy branding Element files
       copy:
