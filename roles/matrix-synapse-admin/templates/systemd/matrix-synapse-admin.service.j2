@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: "True"
 [Unit]
-Description=matrix-synapse-admin
+Description={{ matrix_instance_id }}-synapse-admin
 {% for service in matrix_synapse_admin_systemd_required_services_list %}
 Requires={{ service }}
 After={{ service }}
@@ -11,17 +11,17 @@ Wants={{ service }}
 
 [Service]
 Type=simple
-ExecStartPre=-{{ matrix_host_command_docker }} kill matrix-synapse-admin
-ExecStartPre=-{{ matrix_host_command_docker }} rm matrix-synapse-admin
+ExecStartPre=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse-admin
+ExecStartPre=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse-admin
 
-ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-synapse-admin \
+ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id }}-synapse-admin \
 			--log-driver=none \
 			--cap-drop=ALL \
 			--cap-add=CHOWN \
 			--cap-add=NET_BIND_SERVICE \
 			--cap-add=SETUID \
 			--cap-add=SETGID \
-			--network={{ matrix_docker_network }} \
+			--network={{ matrix_synapse_admin_default_docker_network }} \
 			{% if matrix_synapse_admin_container_http_host_bind_port %}
 			-p {{ matrix_synapse_admin_container_http_host_bind_port }}:80 \
 			{% endif %}
@@ -30,11 +30,11 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name matrix-synapse-admin 
 			{% endfor %}
 			{{ matrix_synapse_admin_docker_image }}
 
-ExecStop=-{{ matrix_host_command_docker }} kill matrix-synapse-admin
-ExecStop=-{{ matrix_host_command_docker }} rm matrix-synapse-admin
+ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse-admin
+ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse-admin
 Restart=always
 RestartSec=30
-SyslogIdentifier=matrix-synapse-admin
+SyslogIdentifier={{ matrix_instance_id }}-synapse-admin
 
 [Install]
 WantedBy=multi-user.target

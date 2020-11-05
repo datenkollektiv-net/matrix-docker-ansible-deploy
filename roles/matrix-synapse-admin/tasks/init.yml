@@ -1,16 +1,17 @@
 - set_fact:
-    matrix_systemd_services_list: "{{ matrix_systemd_services_list + ['matrix-synapse-admin'] }}"
+    matrix_systemd_instance_services_list: "{{ matrix_systemd_instance_services_list + [ matrix_instance_id + '-synapse-admin'] }}"
   when: matrix_synapse_admin_enabled|bool
 
 - block:
-  - name: Fail if matrix-nginx-proxy role already executed
-    fail:
-      msg: >-
-        Trying to append Synapse Admin's reverse-proxying configuration to matrix-nginx-proxy,
-        but it's pointless since the matrix-nginx-proxy role had already executed.
-        To fix this, please change the order of roles in your plabook,
-        so that the matrix-nginx-proxy role would run after the matrix-synapse-admin role.
-    when: matrix_nginx_proxy_role_executed|default(False)|bool
+# Disable this check, because of multi instances nginx is always running..
+#  - name: Fail if matrix-nginx-proxy role already executed
+#    fail:
+#      msg: >-
+#        Trying to append Synapse Admin's reverse-proxying configuration to matrix-nginx-proxy,
+#        but it's pointless since the matrix-nginx-proxy role had already executed.
+#        To fix this, please change the order of roles in your plabook,
+#        so that the matrix-nginx-proxy role would run after the matrix-synapse-admin role.
+#    when: matrix_nginx_proxy_role_executed|default(False)|bool
 
   - name: Generate Synapse Admin proxying configuration for matrix-nginx-proxy
     set_fact:
@@ -21,7 +22,7 @@
         {% if matrix_nginx_proxy_enabled|default(False) %}
           {# Use the embedded DNS resolver in Docker containers to discover the service #}
           resolver 127.0.0.11 valid=5s;
-          set $backend "matrix-synapse-admin:80";
+          set $backend "{{ matrix_instance_id }}-synapse-admin:80";
           proxy_pass http://$backend/$1;
         {% else %}
           {# Generic configuration for use outside of our container setup #}

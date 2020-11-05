@@ -34,7 +34,7 @@
 - name: Ensure matrix-synapse-admin.service installed
   template:
     src: "{{ role_path }}/templates/systemd/matrix-synapse-admin.service.j2"
-    dest: "{{ matrix_systemd_path }}/matrix-synapse-admin.service"
+    dest: "{{ matrix_systemd_path }}/{{ matrix_instance_id }}-synapse-admin.service"
     mode: 0644
   register: matrix_synapse_admin_systemd_service_result
   when: matrix_synapse_admin_enabled|bool
@@ -50,12 +50,12 @@
 
 - name: Check existence of matrix-synapse-admin service
   stat:
-    path: "{{ matrix_systemd_path }}/matrix-synapse-admin.service"
+    path: "{{ matrix_systemd_path }}/{{ matrix_instance_id }}-synapse-admin.service"
   register: matrix_synapse_admin_service_stat
 
 - name: Ensure matrix-synapse-admin is stopped
   service:
-    name: matrix-synapse-admin
+    name: '{{ matrix_instance_id }}-synapse-admin'
     state: stopped
     daemon_reload: yes
   register: stopping_result
@@ -63,7 +63,7 @@
 
 - name: Ensure matrix-synapse-admin.service doesn't exist
   file:
-    path: "{{ matrix_systemd_path }}/matrix-synapse-admin.service"
+    path: "{{ matrix_systemd_path }}/{{ matrix_instance_id }}-synapse-admin.service"
     state: absent
   when: "not matrix_synapse_admin_enabled|bool and matrix_synapse_admin_service_stat.stat.exists"
 

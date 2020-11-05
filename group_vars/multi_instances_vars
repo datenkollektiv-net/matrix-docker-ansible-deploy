@@ -57,6 +57,10 @@ matrix_registration_admin_secret: '{{ lookup("password", secret
                                       + "/matrix/" + matrix_instance_name
                                       + "/matrix_registration_admin_secret") }}'
 
+matrix_synapse_admin_enabled: false
+matrix_synapse_admin_public_endpoint: /administration
+matrix_synapse_admin_default_docker_network: '{{ matrix_docker_nginx_network }}'
+
 # nginx-proxy
 matrix_nginx_proxy_enabled: true
 matrix_docker_nginx_network: 'nginx'
