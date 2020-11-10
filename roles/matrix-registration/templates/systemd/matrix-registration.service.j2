@@ -24,6 +24,10 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{% endif %}
 			-v {{ matrix_registration_config_path }}:/config:ro \
 			-v {{ matrix_registration_data_path }}:/data \
+			{% if matrix_client_element_add_branding_dir %}
+			-v {{ matrix_client_element_data_path + "/" + matrix_client_element_branding_welcomeBackgroundUrl }}:/usr/local/lib/python3.7/site-packages/matrix_registration/static/images/wallpaper.jpg:ro \
+			-v {{ matrix_client_element_data_path + "/" + matrix_registration_custom_style }}:/usr/local/lib/python3.7/site-packages/matrix_registration/static/css/style.css:ro \
+			{% endif %}
 			{% for arg in matrix_registration_container_extra_arguments %}
 			{{ arg }} \
 			{% endfor %}
