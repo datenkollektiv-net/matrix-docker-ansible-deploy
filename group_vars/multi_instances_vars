@@ -32,6 +32,7 @@ matrix_synapse_additional_docker_networks:
 matrix_synapse_macaroon_secret_key: '{{ lookup("password", secret
                                          + "/matrix/" + matrix_instance_name
                                          + "/matrix_synapse_macaroon_secret_key") }}'
+matrix_synapse_max_upload_size_mb: 10
 
 matrix_postgres_enabled: true
 matrix_docker_postgres_network: 'postgres'
