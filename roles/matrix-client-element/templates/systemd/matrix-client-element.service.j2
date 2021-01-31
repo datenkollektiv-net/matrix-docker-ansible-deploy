@@ -5,11 +5,13 @@ Description=Matrix Element server ({{ matrix_instance_id }})
 Requires={{ service }}
 After={{ service }}
 {% endfor %}
+DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-client-element
-ExecStartPre=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-client-element
+Environment="HOME={{ matrix_systemd_unit_home_path }}"
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-client-element 2>/dev/null'
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-client-element 2>/dev/null'
 
 ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id }}-client-element \
 			--log-driver=none \
@@ -21,13 +23,13 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			-p {{ matrix_client_element_container_http_host_bind_port }}:8080 \
 			{% endif %}
 			--tmpfs=/tmp:rw,noexec,nosuid,size=10m \
-			-v {{ matrix_client_element_data_path }}/nginx.conf:/etc/nginx/nginx.conf:ro \
-			-v {{ matrix_client_element_data_path }}/config.json:/app/config.json:ro \
-			-v {{ matrix_client_element_data_path }}/config.json:/app/config.{{ matrix_server_fqn_element }}.json:ro \
+			--mount type=bind,src={{ matrix_client_element_data_path }}/nginx.conf,dst=/etc/nginx/nginx.conf,ro \
+			--mount type=bind,src={{ matrix_client_element_data_path }}/config.json,dst=/app/config.json,ro \
+			--mount type=bind,src={{ matrix_client_element_data_path }}/config.json,dst=/app/config.{{ matrix_server_fqn_element }}.json,ro \
 			{% if matrix_client_element_embedded_pages_home_path is not none %}
-			-v {{ matrix_client_element_data_path }}/home.html:/app/home.html:ro \
+			--mount type=bind,src={{ matrix_client_element_data_path }}/home.html,dst=/app/home.html,ro \
 			{% endif %}
-			-v {{ matrix_client_element_data_path }}/welcome.html:/app/welcome.html:ro \
+			--mount type=bind,src={{ matrix_client_element_data_path }}/welcome.html,dst=/app/welcome.html,ro \
 			{% for arg in matrix_client_element_container_extra_arguments %}
 			{{ arg }} \
 			{% endfor %}
@@ -40,8 +42,8 @@ ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ mat
 {% endfor %}
 {% endif %}
 
-ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-client-element
-ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-client-element
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-client-element 2>/dev/null'
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-client-element 2>/dev/null'
 Restart=always
 RestartSec=30
 SyslogIdentifier={{ matrix_instance_id }}-client-element

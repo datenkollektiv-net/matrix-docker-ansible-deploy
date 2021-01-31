@@ -1,4 +1,9 @@
 #jinja2: lstrip_blocks: "True"
+# postgres psql enviroment
+PGUSER=postgres
+PGPASSWORD={{ matrix_postgres_connection_password }}
+
+# postgres docker enviroment
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD={{ matrix_postgres_connection_password }}
 # Synapse refuses to run if collation is not C.

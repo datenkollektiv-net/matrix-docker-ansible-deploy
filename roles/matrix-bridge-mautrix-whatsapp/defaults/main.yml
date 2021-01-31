@@ -27,6 +27,44 @@ matrix_mautrix_whatsapp_systemd_wanted_services_list: []
 matrix_mautrix_whatsapp_appservice_token: ''
 matrix_mautrix_whatsapp_homeserver_token: ''
 
+matrix_mautrix_whatsapp_appservice_bot_username: whatsappbot
+
+
+# Database-related configuration fields.
+#
+# To use SQLite, stick to these defaults.
+#
+# To use Postgres:
+# - change the engine (`matrix_mautrix_whatsapp_database_engine: 'postgres'`)
+# - adjust your database credentials via the `matrix_mautrix_whatsapp_postgres_*` variables
+matrix_mautrix_whatsapp_database_engine: 'sqlite'
+
+matrix_mautrix_whatsapp_sqlite_database_path_local: "{{ matrix_mautrix_whatsapp_data_path }}/mautrix-whatsapp.db"
+matrix_mautrix_whatsapp_sqlite_database_path_in_container: "/data/mautrix-whatsapp.db"
+
+matrix_mautrix_whatsapp_database_username: 'matrix_mautrix_whatsapp'
+matrix_mautrix_whatsapp_database_password: 'some-password'
+matrix_mautrix_whatsapp_database_hostname: 'matrix-postgres'
+matrix_mautrix_whatsapp_database_port: 5432
+matrix_mautrix_whatsapp_database_name: 'matrix_mautrix_whatsapp'
+
+matrix_mautrix_whatsapp_database_connection_string: 'postgresql://{{ matrix_mautrix_whatsapp_database_username }}:{{ matrix_mautrix_whatsapp_database_password }}@{{ matrix_mautrix_whatsapp_database_hostname }}:{{ matrix_mautrix_whatsapp_database_port }}/{{ matrix_mautrix_whatsapp_database_name }}?sslmode=disable'
+
+matrix_mautrix_whatsapp_appservice_database_type: "{{
+	{
+		'sqlite': 'sqlite3',
+		'postgres':'postgres',
+	}[matrix_mautrix_whatsapp_database_engine]
+}}"
+
+matrix_mautrix_whatsapp_appservice_database_uri: "{{
+	{
+		'sqlite': matrix_mautrix_whatsapp_sqlite_database_path_in_container,
+		'postgres': matrix_mautrix_whatsapp_database_connection_string,
+	}[matrix_mautrix_whatsapp_database_engine]
+}}"
+
+
 # Can be set to enable automatic double-puppeting via Shared Secret Auth (https://github.com/devture/matrix-synapse-shared-secret-auth).
 matrix_mautrix_whatsapp_login_shared_secret: ''
 
@@ -57,11 +95,14 @@ matrix_mautrix_whatsapp_registration_yaml: |
   url: {{ matrix_mautrix_whatsapp_appservice_address }}
   as_token: "{{ matrix_mautrix_whatsapp_appservice_token }}"
   hs_token: "{{ matrix_mautrix_whatsapp_homeserver_token }}"
-  sender_localpart: whatsappbot
+  # See https://github.com/tulir/mautrix-signal/issues/43
+  sender_localpart: _bot_{{ matrix_mautrix_whatsapp_appservice_bot_username }}
   rate_limited: false
   namespaces:
       users:
       - regex: '^@whatsapp_[0-9]+:{{ matrix_mautrix_whatsapp_homeserver_domain|regex_escape }}$'
         exclusive: true
+      - exclusive: true
+        regex: '^@{{ matrix_mautrix_whatsapp_appservice_bot_username|regex_escape }}:{{ matrix_mautrix_whatsapp_homeserver_domain|regex_escape }}$'
 
 matrix_mautrix_whatsapp_registration: "{{ matrix_mautrix_whatsapp_registration_yaml|from_yaml }}"

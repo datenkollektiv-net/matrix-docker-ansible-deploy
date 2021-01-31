@@ -20,7 +20,7 @@
 
 - name: Ensure Synapse repository is present on self-build
   git:
-    repo: https://github.com/matrix-org/synapse.git
+    repo: "{{ matrix_synapse_container_image_self_build_repo }}"
     dest: "{{ matrix_synapse_docker_src_files_path }}"
     version: "{{ matrix_synapse_docker_image.split(':')[1] }}"
     force: "yes"
@@ -66,7 +66,7 @@
     --name={{ matrix_instance_id}}-config
     --user={{ matrix_user_uid }}:{{ matrix_user_gid }}
     --cap-drop=ALL
-    -v {{ matrix_synapse_config_dir_path }}:/data
+    --mount type=bind,src={{ matrix_synapse_config_dir_path }},dst=/data
     -e UID={{ matrix_user_uid }}
     -e GID={{ matrix_user_gid }}
     -e SYNAPSE_CONFIG_PATH=/data/homeserver.yaml

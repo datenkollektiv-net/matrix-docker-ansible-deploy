@@ -8,11 +8,13 @@ After={{ service }}
 {% for service in matrix_registration_systemd_wanted_services_list %}
 Wants={{ service }}
 {% endfor %}
+DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-registration
-ExecStartPre=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-registration
+Environment="HOME={{ matrix_systemd_unit_home_path }}"
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-registration 2>/dev/null'
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-registration 2>/dev/null'
 
 ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id }}-registration \
 			--log-driver=none \
@@ -22,11 +24,11 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{% if matrix_registration_container_http_host_bind_port %}
 			-p {{ matrix_registration_container_http_host_bind_port }}:5000 \
 			{% endif %}
-			-v {{ matrix_registration_config_path }}:/config:ro \
-			-v {{ matrix_registration_data_path }}:/data \
+			--mount type=bind,src={{ matrix_registration_config_path }},dst=/config,ro \
+			--mount type=bind,src={{ matrix_registration_data_path }},dst=/data \
 			{% if matrix_client_element_add_branding_dir %}
-			-v {{ matrix_client_element_data_path + "/" + matrix_client_element_branding_welcomeBackgroundUrl }}:/usr/local/lib/python3.7/site-packages/matrix_registration/static/images/wallpaper.jpg:ro \
-			-v {{ matrix_client_element_data_path + "/" + matrix_registration_custom_style }}:/usr/local/lib/python3.7/site-packages/matrix_registration/static/css/style.css:ro \
+			--mount type=bind,src={{ matrix_client_element_data_path + "/" + matrix_client_element_branding_welcomeBackgroundUrl }},dst=/usr/local/lib/python3.8/site-packages/matrix_registration/static/images/wallpaper.jpg,ro \
+			--mount type=bind,src={{ matrix_client_element_data_path + "/" + matrix_registration_custom_style }},dst=/usr/local/lib/python3.8/site-packages/matrix_registration/static/css/style.css,ro \
 			{% endif %}
 			{% for arg in matrix_registration_container_extra_arguments %}
 			{{ arg }} \
@@ -41,8 +43,8 @@ ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ mat
 {% endfor %}
 {% endif %}
 
-ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-registration
-ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-registration
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-registration 2>/dev/null'
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-registration 2>/dev/null'
 Restart=always
 RestartSec=30
 SyslogIdentifier={{ matrix_instance_id }}-registration

@@ -8,11 +8,13 @@ After={{ service }}
 {% for service in matrix_synapse_systemd_wanted_services_list %}
 Wants={{ service }}
 {% endfor %}
+DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse
-ExecStartPre=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse
+Environment="HOME={{ matrix_systemd_unit_home_path }}"
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse 2>/dev/null'
+ExecStartPre=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse 2>/dev/null'
 {% if matrix_s3_media_store_enabled %}
 # Allow for some time before starting, so that media store can mount.
 # Mounting can happen later too, but if we start writing,
@@ -43,8 +45,8 @@ ExecStart={{ matrix_host_command_docker }} run --rm --name {{ matrix_instance_id
 			{% if matrix_synapse_manhole_enabled and matrix_synapse_container_manhole_api_host_bind_port %}
 			-p {{ matrix_synapse_container_manhole_api_host_bind_port }}:9000 \
 			{% endif %}
-			-v {{ matrix_synapse_config_dir_path }}:/data:ro \
-			-v {{ matrix_synapse_storage_path }}:/matrix-media-store-parent:slave \
+			--mount type=bind,src={{ matrix_synapse_config_dir_path }},dst=/data,ro \
+			--mount type=bind,src={{ matrix_synapse_storage_path }},dst=/matrix-media-store-parent,bind-propagation=slave \
 			{% for volume in matrix_synapse_container_additional_volumes %}
 			-v {{ volume.src }}:{{ volume.dst }}:{{ volume.options }} \
 			{% endfor %}
@@ -61,8 +63,8 @@ ExecStartPost={{ matrix_host_command_docker }} network connect {{ item }} {{ mat
 {% endfor %}
 {% endif %}
 
-ExecStop=-{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse
-ExecStop=-{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} kill {{ matrix_instance_id }}-synapse 2>/dev/null'
+ExecStop=-{{ matrix_host_command_sh }} -c '{{ matrix_host_command_docker }} rm {{ matrix_instance_id }}-synapse 2>/dev/null'
 ExecReload={{ matrix_host_command_docker }} exec {{ matrix_instance_id }}-synapse kill -HUP 1
 Restart=always
 RestartSec=30

@@ -54,15 +54,18 @@ provisioning:
   apiPrefix: /_matrix/provision
 
 database:
+{% if matrix_mx_puppet_twitter_database_engine == 'postgres' %}
   # Use Postgres as a database backend
   # If set, will be used instead of SQLite3
   # Connection string to connect to the Postgres instance
   # with username "user", password "pass", host "localhost" and database name "dbname".
   # Modify each value as necessary
-  #connString: "postgres://user:pass@localhost/dbname?sslmode=disable"
+  connString: {{ matrix_mx_puppet_twitter_database_connection_string|to_json }}
+{% else %}
   # Use SQLite3 as a database backend
   # The name of the database file
-  filename: /data/database.db
+  filename: {{ matrix_mx_puppet_twitter_sqlite_database_path_in_container|to_json }}
+{% endif %}
 
 logging:
   # Log level of console output
@@ -73,20 +76,4 @@ logging:
   lineDateFormat: MMM-D HH:mm:ss.SSS
   # Logging files
   # Log files are rotated daily by default
-  files:
-    # Log file path
-    - file: "/data/bridge.log"
-      # Log level for this file
-      # Allowed values starting with most verbose:
-      # silly, debug, verbose, info, warn, error
-      level: info
-      # Date and time formatting
-      datePattern: YYYY-MM-DD
-      # Maximum number of logs to keep.
-      # This can be a number of files or number of days.
-      # If using days, add 'd' as a suffix
-      maxFiles: 14d
-      # Maximum size of the file after which it will rotate. This can be a
-      # number of bytes, or units of kb, mb, and gb. If using the units, add
-      # 'k', 'm', or 'g' as the suffix
-      maxSize: 50m
+  files: []

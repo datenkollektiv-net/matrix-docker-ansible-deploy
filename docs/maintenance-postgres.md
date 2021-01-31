@@ -19,6 +19,17 @@ You can use the `/usr/local/bin/matrix-postgres-cli` tool to get interactive ter
 
 If you are using an [external Postgres server](configuring-playbook-external-postgres.md), the above tool will not be available.
 
+By default, this tool puts you in the `matrix` database, which contains nothing.
+
+To see the available databases, run `\list` (or just `\l`).
+
+To change to another database (for example `synapse`), run `\connect synapse` (or just `\c synapse`).
+
+You can then proceed to write queries. Example: `SELECT COUNT(*) FROM users;`
+
+**Be careful**. Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption.
+When in doubt, consider [making a backup](#backing-up-postgresql).
+
 
 ## Vacuuming PostgreSQL
 
@@ -45,13 +56,15 @@ docker run \
 --log-driver=none \
 --network=matrix \
 --env-file=/matrix/postgres/env-postgres-psql \
-postgres:13.0-alpine \
+docker.io/postgres:13.1-alpine \
 pg_dumpall -h matrix-postgres \
 | gzip -c \
 > /postgres.sql.gz
 ```
 
 If you are using an [external Postgres server](configuring-playbook-external-postgres.md), the above command will not work, because the credentials file (`/matrix/postgres/env-postgres-psql`) is not available.
+
+If your server is on the ARM32 [architecture](alternative-architectures.md), you may need to remove the `-alpine` suffix from the image name in the command above.
 
 Restoring a backup made this way can be done by [importing it](importing-postgres.md).
 
@@ -69,7 +82,7 @@ This playbook can upgrade your existing Postgres setup with the following comman
 
 	ansible-playbook -i inventory/hosts setup.yml --tags=upgrade-postgres
 
-**The old Postgres data directory is backed up** automatically, by renaming it to `/matrix/postgres-auto-upgrade-backup`.
+**The old Postgres data directory is backed up** automatically, by renaming it to `/matrix/postgres/data-auto-upgrade-backup`.
 To rename to a different path, pass some extra flags to the command above, like this: `--extra-vars="postgres_auto_upgrade_backup_data_path=/another/disk/matrix-postgres-before-upgrade"`
 
 The auto-upgrade-backup directory stays around forever, until you **manually decide to delete it**.
