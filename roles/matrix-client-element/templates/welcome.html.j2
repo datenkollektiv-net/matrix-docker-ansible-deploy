@@ -181,7 +181,7 @@ we don't have an account and should hide them. No account == no guest account ei
                 <div class="mx_ButtonLabel">_t("Sign In")</div>
             </a>
 {% if matrix_client_element_registration_enabled %}
-            <a href="#/register" class="mx_ButtonParent mx_ButtonCreateAccount mx_Button_iconCreateAccount">
+            <a href="{{ 'https://' + matrix_nginx_proxy_proxy_matrix_hostname + matrix_registration_public_endpoint | d('#/register') }}" class="mx_ButtonParent mx_ButtonCreateAccount mx_Button_iconCreateAccount">
                 <div class="mx_ButtonLabel">_t("Create Account")</div>
             </a>
 {% endif %}
