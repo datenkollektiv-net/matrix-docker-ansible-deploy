@@ -68,6 +68,7 @@
   community.general.docker_network:
     name: "{{ matrix_client_cinny_container_network }}"
     driver: bridge
+    driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
 - name: Ensure matrix-client-cinny.service installed
   ansible.builtin.template:

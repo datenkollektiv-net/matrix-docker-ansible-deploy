@@ -47,6 +47,7 @@
   community.general.docker_network:
     name: "{{ matrix_bot_go_neb_container_network }}"
     driver: bridge
+    driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
 - name: Ensure matrix-bot-go-neb.service installed
   ansible.builtin.template:

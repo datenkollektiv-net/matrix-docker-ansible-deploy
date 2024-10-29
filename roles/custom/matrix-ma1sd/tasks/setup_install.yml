@@ -136,6 +136,7 @@
   community.general.docker_network:
     name: "{{ matrix_ma1sd_container_network }}"
     driver: bridge
+    driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
 - name: Ensure matrix-ma1sd.service installed
   ansible.builtin.template:

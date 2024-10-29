@@ -38,6 +38,7 @@
   community.general.docker_network:
     name: "{{ matrix_conduit_container_network }}"
     driver: bridge
+    driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
 - name: Ensure Conduit container image is pulled
   community.docker.docker_image:

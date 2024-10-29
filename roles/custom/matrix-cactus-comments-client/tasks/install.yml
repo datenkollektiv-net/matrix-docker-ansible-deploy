@@ -75,6 +75,7 @@
   community.general.docker_network:
     name: "{{ matrix_cactus_comments_client_container_network }}"
     driver: bridge
+    driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
 - name: Ensure matrix-cactus-comments-client.service installed
   ansible.builtin.template:
